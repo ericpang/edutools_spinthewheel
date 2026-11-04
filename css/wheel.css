@@ -1,0 +1,59 @@
+/* The wheel screen: the wheel and result on the left, the roster on the right. */
+.wheel-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 1.5rem; align-items: start; }
+.wheel-pane { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; min-width: 0; }
+
+.wheel-box { position: relative; width: min(100%, calc(100dvh - 330px), 780px); min-width: 280px; aspect-ratio: 1; }
+.wheel-box canvas { width: 100%; height: 100%; touch-action: manipulation; }
+.wheel-box canvas.is-clickable { cursor: pointer; }
+
+/* --hub-* are set from wheel-view.js so the button always sits exactly on the drawn hub. */
+.spin-hub {
+  position: absolute; left: var(--hub-cx, 50%); top: var(--hub-cy, 53%); width: var(--hub-d, 15%); aspect-ratio: 1;
+  transform: translate(-50%, -50%); border: 0; border-radius: 50%; cursor: pointer;
+  background: radial-gradient(circle at 35% 28%, var(--accent-hover), var(--accent) 70%);
+  color: var(--accent-ink); font: 900 calc(var(--hub-d-px, 90px) * 0.23) / 1 var(--font); letter-spacing: 0.05em;
+  box-shadow: 0 0 0 calc(var(--hub-d-px, 90px) * 0.08) var(--wheel-hub), 0 8px 22px rgb(0 0 0 / 0.4);
+  transition: transform 0.12s, filter 0.2s;
+}
+.spin-hub:hover:not(:disabled) { transform: translate(-50%, -50%) scale(1.06); }
+.spin-hub:active:not(:disabled) { transform: translate(-50%, -50%) scale(0.96); }
+.spin-hub:disabled { cursor: progress; filter: saturate(0.35) brightness(0.9); }
+.spin-hub:focus-visible { outline: 4px solid var(--focus); outline-offset: calc(var(--hub-d-px, 90px) * 0.1); border-radius: 50%; }
+
+.result-bar { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; min-height: 7.5rem; text-align: center; }
+.result-text { font-size: clamp(1.25rem, 2.6vw, 1.9rem); font-weight: 800; letter-spacing: -0.01em; }
+.result-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+
+.roster-pane { position: sticky; top: 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem; max-height: calc(100dvh - 24px); overflow: auto; }
+.roster-list { list-style: none; padding: 0 0.25rem 0 0; width: 100%; display: flex; flex-direction: column; gap: 0.2rem; overflow-y: auto; max-height: min(52vh, 540px); }
+.roster-row { display: flex; align-items: center; gap: 0.25rem; border-radius: 12px; }
+.roster-main {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.65rem; min-height: 52px; padding: 0.25rem 0.5rem;
+  border: 0; border-radius: 12px; background: transparent; color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+}
+.roster-main:hover { background: var(--surface-2); }
+.roster-main canvas { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--surface-3); }
+.roster-name { min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roster-status { margin-left: auto; flex: none; color: var(--good); font-size: 0.78rem; font-weight: 800; }
+.roster-row.is-off .roster-main canvas { filter: grayscale(1); opacity: 0.4; }
+.roster-row.is-off .roster-name { color: var(--ink-3); }
+.roster-row.is-off .roster-status { color: var(--ink-3); }
+.roster-row.is-selected { background: var(--accent-soft); }
+.switch-small { min-height: var(--tap); }
+.switch-small .switch-track { margin: 0 4px; }
+.history { width: 100%; display: flex; flex-direction: column; gap: 0.4rem; }
+.history-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.history-list li { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.15rem 0.65rem 0.15rem 0.2rem; border-radius: 999px; background: var(--surface-2); font-size: 0.82rem; font-weight: 700; }
+.history-list canvas { width: 24px; height: 24px; border-radius: 50%; }
+
+.present-exit { position: fixed; top: 16px; right: 16px; z-index: 20; background: var(--surface); box-shadow: var(--shadow-1); }
+body.present .wheel-grid { grid-template-columns: 1fr; }
+body.present .wheel-box { width: min(100%, calc(100dvh - 230px), 1100px); }
+body.present main { padding-bottom: 0.5rem; }
+body.present .result-bar { min-height: 4rem; }
+
+@media (max-width: 980px) {
+  .wheel-grid { grid-template-columns: 1fr; }
+  .roster-pane { position: static; max-height: none; }
+  .wheel-box { width: min(100%, 94vw, 640px); }
+}

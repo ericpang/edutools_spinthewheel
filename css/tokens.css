@@ -1,0 +1,127 @@
+/* Design tokens. Light is the default; dark follows the system unless the teacher picks a theme (settings). */
+:root {
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-s: 8px;
+  --radius: 14px;
+  --radius-l: 22px;
+  --tap: 44px; /* minimum touch target */
+
+  --bg: #f6f3ee;
+  --bg-2: #ece6db;
+  --surface: #ffffff;
+  --surface-2: #f4f0e9;
+  --surface-3: #e8e1d4;
+  --ink: #1d2330;
+  --ink-2: #4a5266;
+  --ink-3: #68708a;
+  --line: #ddd5c8;
+  --line-strong: #b9ae9b;
+
+  --accent: #4338ca;
+  --accent-hover: #3730a3;
+  --accent-ink: #ffffff;
+  --accent-soft: #e5e7ff;
+  --good: #15803d;
+  --good-soft: #dcfce7;
+  --warn: #a64b00;
+  --warn-soft: #fff1d6;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+  --focus: #1d4ed8;
+
+  --shadow-1: 0 1px 2px rgb(29 35 48 / 0.1), 0 1px 1px rgb(29 35 48 / 0.05);
+  --shadow-2: 0 10px 30px rgb(29 35 48 / 0.16), 0 2px 8px rgb(29 35 48 / 0.1);
+
+  /* photo review */
+  --viewport-bg: #1b1f2b;
+  --box-on: #22c55e;
+  --box-off: #9aa3b5;
+  --box-small: #f59e0b;
+  --box-low: #f43f5e;
+  --box-manual: #38bdf8;
+  --box-text: #0b1020;
+
+  /* the wheel (read by wheel-view.js) */
+  --wheel-rim: #1d2330;
+  --wheel-rim-2: #3b4258;
+  --wheel-sep: rgb(255 255 255 / 0.65);
+  --wheel-ring: #ffffff;
+  --wheel-pointer: #1d2330;
+  --wheel-pointer-edge: #ffffff;
+  --wheel-hub: #ffffff;
+  --wheel-hub-ink: #1d2330;
+  --wheel-dim: rgb(20 24 40 / 0.55);
+  --wheel-glow: rgb(255 255 255 / 0.95);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1220;
+    --bg-2: #0a0c17;
+    --surface: #181c2e;
+    --surface-2: #20253b;
+    --surface-3: #2a3050;
+    --ink: #eceef8;
+    --ink-2: #b3b9d0;
+    --ink-3: #8d94b0;
+    --line: #2d3454;
+    --line-strong: #46507a;
+    --accent: #8f9dff;
+    --accent-hover: #aab4ff;
+    --accent-ink: #0f1220;
+    --accent-soft: #272e5c;
+    --good: #4ade80;
+    --good-soft: #12351f;
+    --warn: #fbbf24;
+    --warn-soft: #3a2a0b;
+    --danger: #fb7185;
+    --danger-soft: #3d1420;
+    --focus: #93c5fd;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-2: 0 10px 30px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.4);
+    --viewport-bg: #0a0c17;
+    --wheel-rim: #eceef8;
+    --wheel-rim-2: #b3b9d0;
+    --wheel-pointer: #ffffff;
+    --wheel-pointer-edge: #0f1220;
+    --wheel-hub: #181c2e;
+    --wheel-hub-ink: #eceef8;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f1220;
+  --bg-2: #0a0c17;
+  --surface: #181c2e;
+  --surface-2: #20253b;
+  --surface-3: #2a3050;
+  --ink: #eceef8;
+  --ink-2: #b3b9d0;
+  --ink-3: #8d94b0;
+  --line: #2d3454;
+  --line-strong: #46507a;
+  --accent: #8f9dff;
+  --accent-hover: #aab4ff;
+  --accent-ink: #0f1220;
+  --accent-soft: #272e5c;
+  --good: #4ade80;
+  --good-soft: #12351f;
+  --warn: #fbbf24;
+  --warn-soft: #3a2a0b;
+  --danger: #fb7185;
+  --danger-soft: #3d1420;
+  --focus: #93c5fd;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-2: 0 10px 30px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.4);
+  --viewport-bg: #0a0c17;
+  --wheel-rim: #eceef8;
+  --wheel-rim-2: #b3b9d0;
+  --wheel-pointer: #ffffff;
+  --wheel-pointer-edge: #0f1220;
+  --wheel-hub: #181c2e;
+  --wheel-hub-ink: #eceef8;
+}
+
+:root { color-scheme: light dark; }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }

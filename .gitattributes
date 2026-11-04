@@ -1,0 +1,5 @@
+# Vendored third-party files are copied in unchanged: no line-ending conversion, so their SHA-256 stays valid.
+vendor/** -text
+models/** -text
+*.wasm binary
+*.tflite binary

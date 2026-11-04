@@ -1,0 +1,75 @@
+/* The review screen: the photo with boxes on the left, the face cards on the right. */
+.screen-review > .lead { margin-top: -0.4rem; }
+.review-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(330px, 1fr); gap: 1.25rem; align-items: start; }
+
+.photo-pane { display: flex; flex-direction: column; gap: 0.5rem; position: sticky; top: 8px; min-width: 0; }
+.photo-toolbar { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+.toolbar-gap { flex: 1 1 0; min-width: 2px; }
+.photo-viewport {
+  position: relative; height: clamp(320px, 62vh, 680px); overflow: hidden; touch-action: none;
+  background: var(--viewport-bg); border-radius: var(--radius-l); box-shadow: var(--shadow-1);
+}
+.photo-viewport canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+.photo-viewport.is-adding canvas { cursor: crosshair; }
+.photo-viewport.is-panning canvas { cursor: grabbing; }
+.photo-viewport canvas:focus-visible { outline-offset: -4px; border-radius: var(--radius-l); }
+
+.detect-overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgb(10 12 25 / 0.55); backdrop-filter: blur(3px); }
+.detect-card {
+  display: flex; flex-direction: column; gap: 0.75rem; width: min(380px, 88%); padding: 1.25rem 1.5rem; text-align: center;
+  background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-2);
+}
+.detect-card > div { display: flex; flex-direction: column; gap: 0.75rem; align-items: center; }
+.detect-label { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 700; }
+
+.faces-pane { display: flex; flex-direction: column; gap: 0.85rem; min-width: 0; }
+.summary { font-size: 1.15rem; font-weight: 800; }
+.sum-note { margin-left: 0.5rem; color: var(--ink-2); font-size: 0.9rem; font-weight: 600; }
+.control-row { display: grid; grid-template-columns: minmax(0, 1fr) 9.5rem; gap: 1rem; }
+.field { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.range-row { display: flex; align-items: center; gap: 0.75rem; }
+.range-row output { min-width: 4.5rem; text-align: right; font-weight: 800; color: var(--accent); }
+.bulk { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.face-grid { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 0.6rem; }
+.face-card {
+  display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 0.7rem; align-items: center; padding: 0.55rem;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius);
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+.face-card.is-active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.face-card.is-off { background: var(--surface-2); }
+.face-card.is-off .face-thumb canvas { filter: grayscale(1); opacity: 0.45; }
+.face-thumb { position: relative; width: 92px; height: 92px; overflow: hidden; border-radius: 12px; background: var(--surface-3); }
+.face-thumb canvas { width: 100%; height: 100%; transition: opacity 0.15s; }
+.face-num {
+  position: absolute; left: 4px; bottom: 4px; padding: 0 0.5rem; border-radius: 999px;
+  background: rgb(15 18 32 / 0.88); color: #fff; font-size: 0.82rem; font-weight: 800;
+}
+.face-badge {
+  position: absolute; right: 4px; top: 4px; padding: 0 0.4rem; border-radius: 6px;
+  background: var(--box-small); color: var(--box-text); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase;
+}
+.face-badge.is-low { background: var(--box-low); color: #fff; }
+.face-badge.is-manual { background: var(--box-manual); }
+.face-body { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.face-row { display: flex; align-items: center; justify-content: space-between; gap: 0.25rem; }
+.face-label { min-height: 40px; padding: 0.3rem 0.6rem; font-size: 0.95rem; }
+.face-delete { flex: none; color: var(--ink-3); }
+.face-delete:hover:not(:disabled) { color: var(--danger); }
+
+.review-actions {
+  position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 1rem;
+  padding: 0.9rem 0 max(0.9rem, env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--bg) 70%, transparent);
+}
+
+@media (max-width: 980px) {
+  .review-grid { grid-template-columns: 1fr; }
+  .photo-pane { position: static; }
+  .photo-viewport { height: auto; aspect-ratio: var(--photo-ar, 1.33); max-height: 62vh; min-height: 240px; }
+  .face-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+}
+@media (max-width: 520px) {
+  .control-row { grid-template-columns: 1fr; }
+  .review-actions .btn { width: 100%; }
+}

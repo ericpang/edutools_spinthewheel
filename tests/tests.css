@@ -1,0 +1,4 @@
+body { font: 15px/1.5 system-ui, sans-serif; margin: 24px; max-width: 960px; }
+h1 { font-size: 20px; }
+pre { background: #f4f4f4; padding: 16px; border-radius: 8px; white-space: pre-wrap; }
+@media (prefers-color-scheme: dark) { body { background: #111; color: #eee; } pre { background: #1c1c1c; } }
