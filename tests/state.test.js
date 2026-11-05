@@ -130,6 +130,18 @@ test('reduced motion: no animation time and no extra turns', () => {
   assert.ok(plan.phiEnd - plan.phiStart < 2 * Math.PI);
 });
 
+test('"always spin" restores the full spin (3 rounds, real duration) on a device that asks for reduced motion', () => {
+  toWheel(6);
+  actions.setEnv({ reducedMotion: true });
+  actions.updateSettings({ motion: 'always' });
+  actions.requestSpin();
+  const { plan } = getState().wheel;
+  actions.updateSettings({ motion: 'system' }); // settings outlive a single test
+  assert.ok(plan.duration > 0, 'the spin takes time');
+  assert.ok(plan.phiEnd - plan.phiStart >= 3 * 2 * Math.PI, 'at least 3 full rounds');
+  actions.setEnv({ reducedMotion: false });
+});
+
 test('"remove picked": the wheel keeps its layout while the result is shown, then drops the winner on the next spin', () => {
   toWheel(4);
   actions.updateSettings({ afterPick: 'remove' });

@@ -12,7 +12,7 @@ import { secureRandom } from './core/rng.js';
 import { TAU, mod, planSpin } from './core/spin.js';
 import { t } from './strings.js';
 
-export const DEFAULT_SETTINGS = Object.freeze({ afterPick: 'keep', spinDuration: 'normal', sound: true, theme: 'system' });
+export const DEFAULT_SETTINGS = Object.freeze({ afterPick: 'keep', spinDuration: 'normal', motion: 'system', sound: true, theme: 'system' });
 const HISTORY_LIMIT = 50;
 const MIN_BOX_PX = 12;
 
@@ -237,7 +237,8 @@ export const actions = {
     if (s.screen !== 'wheel' || s.wheel.phase === 'spinning' || s.popout.open) return false;
     const pool = eligibleFaces(s.faces, s.settings.afterPick);
     if (!pool.length) { announce(t('wheel.everyone')); return false; }
-    const reduced = s.env.reducedMotion;
+    // The teacher can choose "always spin" on a device that asks for reduced motion (ST-1); only the spin is affected.
+    const reduced = s.env.reducedMotion && s.settings.motion !== 'always';
     const plan = planSpin({
       n: pool.length,
       phi: s.wheel.rotation,

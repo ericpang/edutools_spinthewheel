@@ -236,7 +236,7 @@ Priorities: **P0** = first release, **P1** = soon after, **P2** = later.
 | WH-3 | A fixed pointer at 12 o'clock that flicks as segment edges pass under it. | P0 |
 | WH-4 | Spin with the hub's SPIN button (Space or Enter when it has focus). Clicking elsewhere on the wheel does not spin, so a missed click on a thin selected segment can never re-spin the wheel by accident. Ignored while already spinning. | P0 |
 | WH-5 | Fair selection. The winner is drawn uniformly with a secure random source before the animation starts, and the animation is then computed to land inside that segment ([6.2](#62-fair-spin)). | P0 |
-| WH-6 | The wheel makes 3 full rounds, plus the rest of a turn to reach the landing spot, over 4 to 6 seconds (randomised; the Short and Long settings change that), decelerating smoothly, at 60 fps where the device allows. When the user prefers reduced motion there is no spin: the result appears at once, with a short fade (0.5 s or less). | P0 |
+| WH-6 | The wheel makes 3 full rounds, plus the rest of a turn to reach the landing spot, over 4 to 6 seconds (randomised; the Short and Long settings change that), decelerating smoothly, at 60 fps where the device allows. When the user prefers reduced motion there is no spin: the result appears at once, with a short fade (0.5 s or less), unless the teacher has set "Wheel animation: always spin the wheel" in settings (ST-1), which restores the full spin on such a device. | P0 |
 | WH-7 | When it stops, the selected segment is highlighted (outline, lift, others dimmed) and a result bar reads "Selected: #17. Click it to enlarge." The result is announced to screen readers. | P0 |
 | WH-8 | After-pick setting: keep picked students on the wheel (default; they get a "picked" mark) or remove them until reset. A **Reset picks** button restores everyone. | P0 |
 | WH-9 | The wheel fills the available space (up to 90% of the shorter viewport side) and re-lays out on resize or rotation without changing the angle or the result. | P0 |
@@ -269,7 +269,7 @@ This is the signature feature: it is what makes tiny faces usable.
 |---|---|---|
 | RS-1 | A roster panel lists every face (thumbnail, label, status). A toggle takes a student out of the next spin without deleting them, for absences. It is also the keyboard and screen-reader alternative to the canvas. | P0 |
 | RS-2 | Selecting a roster row opens the pop-out as a Preview. | P0 |
-| ST-1 | Settings: after-pick behaviour, spin length (short, normal, long), sound (on by default), theme (system, light, dark). Saved in `localStorage`; contains no student data. | P0 |
+| ST-1 | Settings: after-pick behaviour, spin length (short, normal, long), wheel animation (follow the device's reduced-motion preference, the default, or always spin; it changes only the spin, not fades or the pop-out), sound (on by default), theme (system, light, dark). Saved in `localStorage`; contains no student data. | P0 |
 | ST-2 | **Start over** clears everything in memory after a confirmation. | P0 |
 | PS-1 | By default nothing is stored. Photos, crops and labels live in memory and vanish when the tab closes. A "Leave this page?" prompt appears while there are unsaved edits. | P0 |
 | PS-2 | Opt-in **Save this class on this device** (IndexedDB): photo, boxes, labels and pick state. A saved-classes list, with delete one or delete all. Warn that anyone using this browser profile can open it. | P1 |
@@ -607,6 +607,7 @@ Rules of thumb:
  * @typedef {Object} Settings
  * @property {'keep'|'remove'} afterPick
  * @property {'short'|'normal'|'long'} spinDuration
+ * @property {'system'|'always'} motion
  * @property {boolean} sound        default true (owner request); the Sound button and the settings dialog change it
  * @property {'system'|'light'|'dark'} theme
  */

@@ -6,6 +6,7 @@ const NOTICE_KEY = 'stw.noticeSeen.v1';
 const ALLOWED = {
   afterPick: ['keep', 'remove'],
   spinDuration: ['short', 'normal', 'long'],
+  motion: ['system', 'always'],
   theme: ['system', 'light', 'dark'],
 };
 
