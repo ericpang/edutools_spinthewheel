@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Spin The Wheel is a classroom random picker: the teacher uploads one class photo, the app finds every face in the browser and turns each into a wheel segment, and clicking the selected segment makes that face pop out enlarged. Version 1 is built (all P0 items, most P1) and tested in Chrome and Edge.
 
 - `README.md` is the spec and the source of truth for behaviour and numbers. Section 13 says what is built and what is not; section 15 lists decisions that are still open (previews from the wheel, names, saved classes, telemetry, phone-to-computer transfer). Don't pick an answer silently; ask or flag it.
-- `vendor/README.md` records the source, licence and SHA-256 of the vendored MediaPipe runtime and model.
+- `vendor/README.md` records the source, licence and SHA-256 of the vendored MediaPipe runtime and model, and of PeerJS and qrcode-generator.
+- The phone-to-computer transfer (UP-7, README open question 8) is built, and the owner confirmed its design on 2026-11-05 (PeerJS's public pairing service, end-to-end encrypted). `PAIRING.enabled = false` in `js/pair/config.js` hides it.
 
 ## Commands
 
@@ -15,6 +16,7 @@ There is no build, no `package.json` and no `npm install`.
 
 - **Run:** serve the folder over HTTP, for example `node tests/e2e/serve.mjs 8080` or `python -m http.server 8080`, then open `http://localhost:8080`. `file://` does not work (ES modules, WebAssembly).
 - **Unit tests:** `node --test "tests/*.test.js"` (Node 22+; keep the quotes, a bare folder name is treated as a file). One file: `node --test tests/core.test.js`; one test: add `--test-name-pattern "text"`. Or open `/tests/` in the browser. A new test file must also be imported in `tests/run-browser.js`.
+- **End to end, phone transfer:** `node tests/e2e/pair.mjs [--shots dir]` plays computer and phone in one browser against the real pairing service (needs internet; generates its own noise PNG).
 - **End to end:** `node tests/e2e/run.mjs --photo <photo with faces> [--only text] [--slow] [--shots dir]` drives Chrome or Edge over the DevTools protocol (no dependencies). The photo is not in the repo; use one you may use, never real students' photos.
 
 ## Constraints decided by the owner
@@ -33,10 +35,18 @@ There is no build, no `package.json` and no `npm install`.
 
 ## Privacy rules that constrain code
 
-- Photos, crops and labels never leave the browser. No CDN or third-party requests; detector files are self-hosted. Only settings and a "notice seen" flag go in `localStorage`; no student data in storage, URLs or caches, and no export of face images. Never commit real students' photos.
+- Photos, crops and labels never leave the browser, with one optional exception: the phone transfer (UP-7) sends an end-to-end encrypted photo from phone to computer, and only `pair.html` and `send.html` may contact `0.peerjs.com`. `index.html` must never mention that host and keeps `connect-src 'self'` (a test checks this). No CDN or third-party requests otherwise; detector, PeerJS and QR files are self-hosted. Only settings and a "notice seen" flag go in `localStorage`; no student data in storage, URLs or caches, and no export of face images. Never commit real students' photos.
 - The CSP (a `<meta>` tag in `index.html`) must keep `connect-src 'self'`: MediaPipe's runtime tries to post usage metrics to `odml.pa.googleapis.com` every 60 seconds, and the CSP is what blocks it. The console messages about that are expected and harmless.
 - The CSP also has `style-src 'self'`, so no inline `style=""` attributes or `setAttribute('style', ...)`: use classes, or the CSSOM (`el.style.x = ...`, `style.setProperty`).
 - Detection only: no recognition, embeddings or attribute inference.
+
+## Phone transfer (UP-7)
+
+- `index.html` shows a dialog (`js/ui/pair.js`) that embeds `pair.html` in an iframe; that page (`js/pair/pair-page.js`) makes a session, draws the QR code and receives the photo, then hands the `File` to the main page with `postMessage` (same origin only). The phone opens `send.html` (`js/pair/send-page.js`) from the link `send.html#<id>.<key>`.
+- `js/pair/protocol.js` is pure (Node-tested): session, link, AES-256-GCM per message with the position in the stream as additional data, chunking, and the `Receiver` that checks every message. Keep chunk plus 28 bytes at 16 KiB.
+- The session id must satisfy PeerJS's `validateId` (letters and digits, `-`/`_` only between them), so it is hex; base64url ids fail about half the time.
+- Close the dialog through `close()` in `ui/pair.js`, not only `dialog.close()`: the `close` event can be late or missing in a background tab, and the frame must go at once so the code stops working.
+- The pair pages' CSP forbids `eval`, so e2e checks inside the frame use a DevTools execution context (see `tests/e2e/pair.mjs`).
 
 ## Editing notes
 

@@ -196,6 +196,7 @@ Priorities: **P0** = first release, **P1** = soon after, **P2** = later.
 | UP-4 | Apply the photo's EXIF orientation so it appears upright. Crops carry no metadata (no GPS, device or timestamp data). | P0 |
 | UP-5 | Add more photos to the same class (for example one per table). Faces from every photo go on one wheel, within the 50-face limit (FD-8). | P1 |
 | UP-6 | Accept HEIC/HEIF through a lazy-loaded, client-side converter. | P2 |
+| UP-7 | **Use a photo from your phone.** A button on the upload screen opens a dialog with a one-time QR code (valid for 10 minutes). The phone scans it, opens a small page (`send.html`), takes or picks a photo and sends it; the photo then opens on the computer exactly like an uploaded one. The photo is encrypted on the phone with a key that is only in the link's `#` part, and travels over a WebRTC data channel (direct when the network allows it, through a relay otherwise). A public pairing service only introduces the two devices; it sees the random session id and the devices' addresses, never the key or the photo. All of this runs in two separate pages with their own CSP, so the main page keeps `connect-src 'self'` ([section 7](#7-privacy-and-safety)). | P1 |
 
 ### 4.2 Face detection and extraction
 
@@ -443,7 +444,7 @@ Previews (RS-2, PO-10) open the same dialog from `idle` or `selected` and return
 
 The photos show children, so privacy is a design constraint, not an afterthought.
 
-- **Everything stays in the browser.** Photos, crops and labels are never uploaded. There is no server component to upload to.
+- **Everything stays in the browser.** Photos, crops and labels are never uploaded. There is no server component to upload to. *One optional exception, UP-7:* if the teacher chooses "Use a photo from your phone", that photo travels from the phone to the computer, end-to-end encrypted (AES-256-GCM, a fresh key per session carried only in the link's `#` part, which browsers never send to a server). A public PeerJS pairing service (`0.peerjs.com`, set in `js/pair/config.js`) and, when a direct connection is not possible, PeerJS's relay servers see the session id, the devices' IP addresses and encrypted bytes, never the key or the photo. The feature can be turned off with `PAIRING.enabled = false`.
 - **Same-origin assets only.** The detector runtime and model are served with the app (no CDN at runtime). A strict Content-Security-Policy with `connect-src 'self'` makes "nothing leaves the device" enforceable by the browser, and it is required (see the next point), not optional hardening. A starting point, to be tightened and verified in M1:
 
   ```
@@ -453,6 +454,7 @@ The photos show children, so privacy is a design constraint, not an afterthought
   ```
 
   On hosts that cannot set headers, use a `<meta http-equiv="Content-Security-Policy">` tag (it ignores `frame-ancestors`).
+- **The phone pages have their own CSP.** `pair.html` (embedded in the dialog) and `send.html` (opened on the phone) are the only pages that may reach the network, and only `https://0.peerjs.com` and `wss://0.peerjs.com` in addition to themselves; they allow no inline or eval scripts. `index.html` never mentions that host (a unit test checks both). Closing the dialog removes the frame, which ends the session, and a used or expired code cannot be reused.
 - **Known exception: runtime telemetry.** The proposed default runtime (MediaPipe Tasks) sends performance and usage metrics to Google every 60 seconds (`odml.pa.googleapis.com`). Its privacy notice says input images are not sent, but the request would still reveal the visitor's IP address and browser, the notice puts the duty to obtain consent on the app developer, and there is no setting to turn it off. So the CSP above must block it. In the code, a blocked request just stops the metrics timer and detection carries on; This was confirmed in Chrome: after 60 seconds the runtime tried to send its metrics, the browser blocked the request (a CSP message appears in the console), and detection carried on. Fallbacks: patch the logging out of the vendored bundle (documented, as Apache-2.0 requires) or choose another engine. Details in [vendor/README.md](vendor/README.md).
 - **Detect, don't identify.** No recognition, no embeddings, no attribute inference (see non-goals).
 - **Memory only by default** (PS-1). Saving is opt-in (PS-2) and clearly explained. A **Delete all data** button in settings wipes IndexedDB, caches and `localStorage`.
@@ -527,22 +529,26 @@ Tests: open `http://localhost:8080/tests/` in the browser, or run `node --test "
 
 Push the folder to a repository, then in Settings, Pages, choose "Deploy from a branch", branch `main`, folder `/ (root)`. The site appears at `https://<user>.github.io/<repository>/`. Everything uses relative paths, so the app works from that sub-folder (tested), and `.nojekyll` stops Pages from running Jekyll over it. GitHub Pages cannot set HTTP headers, so the Content-Security-Policy is a `<meta>` tag in `index.html`; it blocks the detector's metrics request just as well.
 
-GitHub Pages only serves files. Each visitor's browser runs its own copy of the app, and a photo goes nowhere else, so a photo taken on a phone has to be opened in the browser that will run the wheel (see open question 8).
+GitHub Pages only serves files. Each visitor's browser runs its own copy of the app, and a photo goes nowhere else, with one optional exception: "Use a photo from your phone" (UP-7) sends an encrypted photo from the phone to the computer through a public pairing service ([section 7](#7-privacy-and-safety)). It needs the site to be served over HTTPS, because the encryption (`crypto.subtle`) only exists in secure contexts and the phone cannot reach `localhost`; on `http://localhost` the phone cannot reach the page, so test it on the deployed site, or with the e2e script, which plays both devices.
 
 ### Structure
 
 ```
 edutools_spinthewheel/
   index.html              all screens as <section>s, the <template>s and the <dialog>s
+  pair.html               computer side of the phone transfer (QR code), shown in a dialog; has its own CSP
+  send.html               phone side of the phone transfer (take or pick a photo); has its own CSP
   css/
     tokens.css            colours, spacing, light and dark themes
-    base.css  layout.css  review.css  wheel.css  popout.css
+    base.css  layout.css  review.css  wheel.css  popout.css  pair.css
   js/
     main.js               entry point: wires the modules together and switches screens
     state.js              observable store and every action that changes it
     strings.js            all UI text
-    ui/                   DOM code: upload, review, photo-viewer, wheel-view, roster, popout,
+    ui/                   DOM code: upload, pair, review, photo-viewer, wheel-view, roster, popout,
                           settings, present, toasts, sound, dom helpers
+    pair/                 phone transfer: config, protocol (encryption and chunking, no DOM, tested in
+                          Node), pair-page (computer), send-page (phone)
     core/                 pure logic, no DOM: config, rng, spin, wheel-geometry, crop, tiling,
                           nms, reading-order, faces
     media/                photo decoding, the mip pyramid, crops, the thumbnail cache (needs the DOM)
@@ -551,6 +557,7 @@ edutools_spinthewheel/
   vendor/                 third-party files, copied in unchanged
     README.md             source, version, licence and SHA-256 of every file
     mediapipe/            MediaPipe Tasks Vision 1.2.2: bundles, wasm/, LICENSE
+    peerjs/  qrcode/      PeerJS (WebRTC pairing) and qrcode-generator, used only by pair.html and send.html
   models/                 detector model file(s)
     blaze_face_short_range.tflite
   tests/                  index.html (browser) and *.test.js (the same files run under Node)
@@ -637,7 +644,7 @@ Rules of thumb:
 
 - **Unit tests** for the pure `js/core/` modules and the store (`js/state.js`): RNG uniformity (AC-5), landing maths and result consistency (AC-6), the 3 rounds, hit-testing, crop clamping, duplicate merging, tile coverage and overlap, reading order, the 50-face cap and swapping (AC-11), and the spin, pick, undo and settings actions. They are plain ES modules that run in the browser through `tests/index.html` (a tiny in-repo harness, no dependencies) and under Node: `node --test "tests/*.test.js"` (Node 22 or newer; keep the quotes, because a bare folder name is treated as a file).
 - **Detection benchmark** (`benchmark/`): at least 20 photos with ground-truth boxes, 10 to 45 faces each (plus at least one photo with more than 50 faces to exercise the cap), covering a mix of resolutions, distances and lighting, children and adults, diverse skin tones, glasses and head coverings. Photos must be licensed, synthetic, or taken with explicit consent. Real students' photos are never committed to the repository. Report recall and precision by face-size band and by group, plus run time. **Not built yet:** so far the search has only been tried on one public-domain group photo (29 people, 3,000 px wide), where it found every face.
-- **Manual checklist** (optionally automated with Playwright as a dev-only tool): the full flow with mouse, touch and keyboard only; projector resolution; reduced motion; a real phone and an iPad; a slow device. `tests/e2e/` has a dependency-free script that drives Chrome or Edge through the main flows over the DevTools protocol (see its header); what it cannot cover still needs a person, a real phone and an iPad.
+- **Manual checklist** (optionally automated with Playwright as a dev-only tool): the full flow with mouse, touch and keyboard only; projector resolution; reduced motion; a real phone and an iPad; a slow device. `tests/e2e/` has a dependency-free script that drives Chrome or Edge through the main flows over the DevTools protocol (see its header), and `tests/e2e/pair.mjs` plays a computer and a phone against the real pairing service (it needs internet); what it cannot cover still needs a person, a real phone and an iPad.
 
 ### Acceptance criteria
 
@@ -663,7 +670,7 @@ Where things stand: M0 and M1 are done, and most of M2.
 
 - **M0, spike: de-risk detection. Done.** The tiled search was built and run with the vendored MediaPipe files in Chrome and Edge, under the strict CSP, on a public-domain group photo of 29 people. Findings: all 29 faces are found at Normal sensitivity (scores 0.75 to 0.96), with a few low-scoring false boxes (up to 0.60) that the review step removes; the overlap had to go from 25% to 35% ([5.2](#52-finding-small-faces)); canvas downscaling with `medium` or `high` smoothing is slow, so tiles are cut from a pyramid of halved copies (about 4 ms a tile instead of about 30 ms); and the runtime's metrics request is blocked by the CSP while detection carries on ([section 7](#7-privacy-and-safety)). *Still open:* a proper benchmark of 20 or more photos, including children, with recall by group. The FD-2 targets are only checked on the one photo.
 - **M1, MVP. Done.** Every P0 item: upload, detect, review, wheel, spin, selected segment, pop-out, roster, settings, privacy basics, keyboard and screen-reader support, and tests.
-- **M2, classroom-ready. Mostly done.** Built: present mode (WH-11), pick history (WH-12), context view (PO-9), Remove from the pop-out (PO-8), expected-count warning (RV-8), bulk actions (RV-9), undo and redo (RV-10). Not built: more than one photo (UP-5), box handles (RV-7), previews from the wheel (PO-10, an open question), saved classes (PS-2), offline use.
+- **M2, classroom-ready. Mostly done.** Built: present mode (WH-11), pick history (WH-12), context view (PO-9), Remove from the pop-out (PO-8), expected-count warning (RV-8), bulk actions (RV-9), undo and redo (RV-10). Built after M1: photo from a phone (UP-7; the design was confirmed by the owner, see open question 8). Not built: more than one photo (UP-5), box handles (RV-7), previews from the wheel (PO-10, an open question), saved classes (PS-2), offline use.
 - **M3, later. Not built:** HEIC (UP-6), export and import (PS-3), confetti and the other P2 items in WH-14, a denser staggered layout.
 
 ---
@@ -693,7 +700,7 @@ Where things stand: M0 and M1 are done, and most of M2.
 5. **Class and photo size.** The wheel is capped at 50 faces. What are the typical and the largest class sizes, and what is the typical photo (phone, webcam, lecture hall)? If classes above 50 are common, a "groups" feature (several wheels from one set of photos) could be added.
 6. **Runtime telemetry.** The vendored MediaPipe runtime tries to send usage metrics to Google; the CSP blocks it and detection carries on (verified in Chrome, [section 7](#7-privacy-and-safety)). Are you comfortable relying on the CSP to block it, or would you rather use an engine with no reporting at all (for example YuNet through ONNX Runtime Web)?
 7. **Reach.** Any languages besides English? Where will it be hosted (public site, school intranet, both)?
-8. **Phone to computer.** The photo never leaves the browser that opened it, so a photo taken on a phone has to reach the browser that will run the wheel. Today that means doing everything on the phone and casting it, or moving the photo yourself (AirDrop, Quick Share, Phone Link, Drive, email; send the original, as chat apps compress it). A built-in "send from phone" button would need either a direct phone-to-computer link paired by QR code (no server and no third party, but it only works if both devices are on a network that lets them talk to each other, which many school networks do not) or a relay server (works everywhere, but children's photos then pass through a server, even if encrypted). Which, if either?
+8. **Phone to computer.** *Decided and built as UP-7 (confirmed by the owner on 2026-11-05).* The photo never leaves the browser that opened it, so a photo taken on a phone has to reach the browser that will run the wheel. The options were: move the photo yourself (AirDrop, Quick Share, Phone Link, Drive, email), a direct phone-to-computer link paired by QR code with no third party (but it fails on networks that block device-to-device traffic, which many school networks do), or a relay (works everywhere, but children's photos then pass through someone else's server). What is built is the middle road: a direct WebRTC link introduced by PeerJS's free public pairing service, with PeerJS's STUN and relay servers as the fallback, and every byte end-to-end encrypted with a key the service never sees. This does add a third party to a product that otherwise promises "nothing leaves the device"; the owner accepted that. To switch it off, set `PAIRING.enabled = false` in `js/pair/config.js` (the button disappears), or point `PAIRING.signalling` and `iceServers` at servers you run (https://github.com/peers/peerjs-server).
 
 ---
 

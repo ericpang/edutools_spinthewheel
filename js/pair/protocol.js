@@ -3,8 +3,15 @@
 // to any server, and it encrypts every message: the pairing service and any relay on the way see only ciphertext.
 import { MAX_FILE_BYTES } from '../core/config.js';
 
-export const CHUNK_BYTES = 16 * 1024; // a size every browser's data channel accepts
+// Each sealed message adds a 12-byte IV and a 16-byte tag, so a chunk of this size makes a message of exactly
+// 16 KiB, the size every browser's data channel accepts.
+export const CHUNK_BYTES = 16 * 1024 - 28;
 const TAG = 'stw1';
+
+/** What the computer answers (as plain text, over the encrypted channel) once a photo is complete or refused. */
+export const ACK_OK = 'ok';
+export const ACK_ERROR = 'error:'; // followed by a ProtocolError code
+export const parseAck = (text) => (text === ACK_OK ? { ok: true } : typeof text === 'string' && text.startsWith(ACK_ERROR) ? { ok: false, code: text.slice(ACK_ERROR.length) } : null);
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -20,7 +27,8 @@ const fromBase64Url = (text) => Uint8Array.from(atob(text.replaceAll('-', '+').r
 /** A one-time session: `id` names the computer on the pairing service, `key` encrypts everything. */
 export function newSession() {
   return {
-    id: `stw-${toBase64Url(crypto.getRandomValues(new Uint8Array(16)))}`, // 22 characters after the prefix
+    // Hex, not base64url: PeerJS refuses ids with a "-" or "_" at the end or two in a row, which base64url often makes.
+    id: `stw-${[...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join('')}`, // 128 bits: 32 characters after the prefix
     key: toBase64Url(crypto.getRandomValues(new Uint8Array(32))),         // AES-256, 43 characters
   };
 }
@@ -30,7 +38,7 @@ export const buildLink = (pageUrl, { id, key }) => `${pageUrl}#${id}.${key}`;
 
 /** Read "#id.key" back from a link's hash; null when it is not one of ours. */
 export function parseLink(hash) {
-  const match = /^#?(stw-[A-Za-z0-9_-]{22})\.([A-Za-z0-9_-]{43})$/.exec(hash ?? '');
+  const match = /^#?(stw-[0-9a-f]{32})\.([A-Za-z0-9_-]{43})$/.exec(hash ?? '');
   return match ? { id: match[1], key: match[2] } : null;
 }
 

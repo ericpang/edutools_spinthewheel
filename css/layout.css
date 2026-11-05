@@ -47,6 +47,7 @@ main { max-width: 1400px; margin: 0 auto; padding: 0 max(16px, env(safe-area-ins
 .dz-or { color: var(--ink-3); font-weight: 600; }
 .dz-note { color: var(--ink-2); font-size: 0.9rem; }
 .dz-button { pointer-events: none; }
+.phone-option { display: flex; justify-content: center; }
 .privacy-line { display: flex; align-items: center; gap: 0.5rem; color: var(--good); font-weight: 700; }
 .tips h2 { margin-bottom: 0.6rem; }
 .tips ul { display: flex; flex-direction: column; gap: 0.6rem; color: var(--ink-2); }

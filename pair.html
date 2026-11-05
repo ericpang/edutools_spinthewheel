@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The only pages that talk to the network are this one and send.html. Both allow exactly the pairing service named in
+     js/pair/config.js (a test checks that they agree). The main page stays at connect-src 'self'. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="color-scheme" content="light dark">
+<meta name="referrer" content="no-referrer">
+<title>Pair with your phone</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/pair.css">
+</head>
+<body class="pair-body">
+
+<main class="pair">
+  <div id="pair-code" class="pair-code" hidden>
+    <canvas id="qr" class="qr" role="img" data-t-attr="aria-label:pair.qrAria"></canvas>
+    <div class="pair-side">
+      <p class="pair-scan" data-t="pair.scan"></p>
+      <ol class="pair-steps">
+        <li data-t="pair.step.1"></li>
+        <li data-t="pair.step.2"></li>
+        <li data-t="pair.step.3"></li>
+      </ol>
+      <button type="button" id="btn-copy" class="btn btn-small" data-t="pair.copy"></button>
+    </div>
+  </div>
+
+  <p id="pair-status" class="pair-status" role="status"></p>
+  <p id="pair-expires" class="hint" hidden></p>
+  <button type="button" id="btn-again" class="btn btn-primary" data-t="pair.again" hidden></button>
+  <progress id="pair-progress" max="100" value="0" hidden></progress>
+  <p class="hint pair-privacy" data-t="pair.privacy"></p>
+</main>
+
+<script src="vendor/peerjs/peerjs.min.js"></script>
+<script src="vendor/qrcode/qrcode.js"></script>
+<script type="module" src="js/pair/pair-page.js"></script>
+</body>
+</html>

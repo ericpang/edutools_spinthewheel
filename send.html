@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- See pair.html: this page may talk to the pairing service named in js/pair/config.js and to nobody else. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="color-scheme" content="light dark">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>Send a photo</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/pair.css">
+</head>
+<body class="send-body">
+
+<main class="send">
+  <h1 data-t="send.title"></h1>
+  <p id="send-status" class="send-status" role="status"></p>
+  <progress id="send-progress" max="100" value="0" hidden></progress>
+
+  <div id="send-actions" class="send-actions" hidden>
+    <label class="btn btn-primary btn-xl send-pick">
+      <span data-t="send.take"></span>
+      <input id="input-camera" class="visually-hidden" type="file" accept="image/*" capture="environment">
+    </label>
+    <label class="btn btn-lg send-pick">
+      <span data-t="send.choose"></span>
+      <input id="input-library" class="visually-hidden" type="file" accept="image/*">
+    </label>
+  </div>
+  <button type="button" id="btn-retry" class="btn btn-primary btn-lg" data-t="send.retry" hidden></button>
+
+  <p class="hint" data-t="send.privacy"></p>
+</main>
+
+<script src="vendor/peerjs/peerjs.min.js"></script>
+<script type="module" src="js/pair/send-page.js"></script>
+</body>
+</html>

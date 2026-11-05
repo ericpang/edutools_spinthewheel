@@ -103,3 +103,16 @@ const { FaceDetector, FilesetResolver } = Vision;
 3. Extract it into another fresh folder. Nothing from the package was executed.
 4. Copy only the files listed above into this repository, then confirm each copy has the same SHA-256 as its source.
 5. Download the model and the licence text into their own fresh folders, and check the model's header.
+
+## Phone transfer libraries (added 2026-11-05)
+
+Used only by `pair.html` and `send.html`, never by the main page. They were already in the repository when this record was written, so **the download source and version could not be verified from here**: the files carry no version string. What can be said:
+
+| File | What it is | Licence | SHA-256 |
+|---|---|---|---|
+| `vendor/peerjs/peerjs.min.js` | PeerJS browser bundle (WebRTC data channels through a pairing server). Its built-in default relay servers (`turn.peerjs.com`) suggest release 1.5.3 or later; unconfirmed. | MIT, `vendor/peerjs/LICENSE` | `7604d8c31bec4f134b0d15c2d80b1d095ea18af005354f439f14291fcd7b4168` |
+| `vendor/qrcode/qrcode.js` | qrcode-generator by Kazuhiko Arase (browser build, defines a global `qrcode`). | MIT, `vendor/qrcode/LICENSE` | `79ec86f82856005b1c887905cfccfcfbec3821ca61c7fd5a952faa5f778f791c` |
+
+**TODO for the owner:** re-download both from npm (`peerjs`, `qrcode-generator`), compare with the hashes above and record the exact versions and URLs here.
+
+PeerJS contacts the pairing service configured in `js/pair/config.js` (default `0.peerjs.com`) and, through WebRTC, Google's STUN server and PeerJS's TURN relays. See README section 7.

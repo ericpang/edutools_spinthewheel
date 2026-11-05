@@ -19,13 +19,18 @@ async function receiveAll(key, msgs) {
 
 test('a session has a pairing id and a 256-bit key, and the link round-trips', () => {
   const s = newSession();
-  assert.ok(/^stw-[A-Za-z0-9_-]{22}$/.test(s.id) && /^[A-Za-z0-9_-]{43}$/.test(s.key));
+  assert.ok(/^stw-[0-9a-f]{32}$/.test(s.id) && /^[A-Za-z0-9_-]{43}$/.test(s.key));
   assert.ok(newSession().id !== s.id && newSession().key !== s.key, 'every session is new');
   const link = buildLink('https://example.github.io/spin/send.html', s);
   assert.deepEqual(parseLink(new URL(link).hash), s);
   assert.equal(parseLink('#nonsense'), null);
   assert.equal(parseLink(''), null);
   assert.equal(parseLink(`#${s.id}.${s.key}x`), null, 'a key of the wrong length is refused');
+});
+
+test('every session id is one the pairing service accepts (letters and digits, "-" or "_" only between them)', () => {
+  const peerJsRule = /^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/; // PeerJS util.validateId
+  for (let i = 0; i < 2000; i++) assert.ok(peerJsRule.test(newSession().id));
 });
 
 test('the secret part of the link is in the fragment, which browsers never send to a server', () => {

@@ -3,6 +3,7 @@
 import './core.test.js';
 import './faces.test.js';
 import './state.test.js';
+import './pair.test.js';
 import { runAll } from './harness.js';
 
 runAll(document.getElementById('out'));

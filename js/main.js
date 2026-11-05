@@ -4,6 +4,7 @@ import { clearThumbs } from './media/thumbs.js';
 import { actions, getState, subscribe } from './state.js';
 import { loadSettings, markNoticeSeen, noticeSeen, saveSettings } from './storage/settings.js';
 import { $, applyStrings, prefersReducedMotion } from './ui/dom.js';
+import { initPair } from './ui/pair.js';
 import { initPopout } from './ui/popout.js';
 import { initPresent } from './ui/present.js';
 import { initReview } from './ui/review.js';
@@ -75,6 +76,7 @@ function boot() {
   initGlobals();
   initToasts();
   initUpload();
+  initPair();
   initReview();
   initWheel();
   initRoster();

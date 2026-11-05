@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="css/review.css">
 <link rel="stylesheet" href="css/wheel.css">
 <link rel="stylesheet" href="css/popout.css">
+<link rel="stylesheet" href="css/pair.css">
 </head>
 <body>
 
@@ -37,6 +38,7 @@
   <symbol id="i-user-minus" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20a6 6 0 0 1 12 0M17 11h5"/></symbol>
   <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4 3 20h18L12 4zM12 10v4M12 17h.01"/></symbol>
   <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13 7l4 4"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></symbol>
   <symbol id="i-sound" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
   <symbol id="i-sound-off" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5zM16 9.5l5 5M21 9.5l-5 5"/></symbol>
 </svg>
@@ -70,6 +72,9 @@
         <span class="dz-note" data-t="upload.formats"></span>
         <input id="file-input" class="visually-hidden" type="file" accept="image/*">
       </label>
+      <p id="phone-option" class="phone-option">
+        <button type="button" id="btn-phone" class="btn btn-lg"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span data-t="upload.phone"></span></button>
+      </p>
       <p class="privacy-line"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span data-t="upload.privacy"></span></p>
       <p id="upload-error" class="form-error" role="alert" hidden></p>
     </div>
@@ -260,7 +265,17 @@
   </form>
 </dialog>
 
-<dialog id="help-dialog" class="sheet" aria-labelledby="help-title">
+<dialog id="pair-dialog" class="sheet pair-sheet" aria-labelledby="pair-title">
+  <div class="sheet-body">
+    <div class="sheet-head">
+      <h2 id="pair-title" data-t="pair.title"></h2>
+      <button type="button" id="pair-close" class="btn btn-icon" data-t-attr="aria-label:common.close;title:common.close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    </div>
+    <div id="pair-holder"></div>
+  </div>
+</dialog>
+
+<dialog id="help-dialog"class="sheet" aria-labelledby="help-title">
   <form method="dialog" class="sheet-body">
     <div class="sheet-head">
       <h2 id="help-title" data-t="help.title"></h2>
